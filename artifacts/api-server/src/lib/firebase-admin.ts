@@ -11,9 +11,19 @@ if (!serviceAccountJson) {
 
 let serviceAccount: admin.ServiceAccount;
 try {
-  serviceAccount = JSON.parse(serviceAccountJson) as admin.ServiceAccount;
-} catch {
-  throw new Error("FIREBASE_SERVICE_ACCOUNT is not valid JSON.");
+  // Handle cases where the JSON might be base64-encoded or have escaped newlines
+  let raw = serviceAccountJson.trim();
+  // If it looks base64 (no braces), try decoding
+  if (!raw.startsWith("{")) {
+    raw = Buffer.from(raw, "base64").toString("utf-8").trim();
+  }
+  // Unescape newlines in private_key that some tools add
+  serviceAccount = JSON.parse(raw) as admin.ServiceAccount;
+} catch (err) {
+  const preview = serviceAccountJson.slice(0, 80);
+  throw new Error(
+    `FIREBASE_SERVICE_ACCOUNT is not valid JSON. First 80 chars: ${preview}\nOriginal error: ${String(err)}`
+  );
 }
 
 if (!admin.apps.length) {
