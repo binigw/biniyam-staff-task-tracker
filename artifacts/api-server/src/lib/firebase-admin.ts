@@ -1,4 +1,6 @@
-import admin from "firebase-admin";
+import { initializeApp, getApps, cert, type App } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
+import { getAuth } from "firebase-admin/auth";
 import { logger } from "./logger";
 
 const serviceAccountJson = process.env["FIREBASE_SERVICE_ACCOUNT"];
@@ -9,16 +11,13 @@ if (!serviceAccountJson) {
   );
 }
 
-let serviceAccount: admin.ServiceAccount;
+let serviceAccount: Record<string, unknown>;
 try {
-  // Handle cases where the JSON might be base64-encoded or have escaped newlines
   let raw = serviceAccountJson.trim();
-  // If it looks base64 (no braces), try decoding
   if (!raw.startsWith("{")) {
     raw = Buffer.from(raw, "base64").toString("utf-8").trim();
   }
-  // Unescape newlines in private_key that some tools add
-  serviceAccount = JSON.parse(raw) as admin.ServiceAccount;
+  serviceAccount = JSON.parse(raw) as Record<string, unknown>;
 } catch (err) {
   const preview = serviceAccountJson.slice(0, 80);
   throw new Error(
@@ -26,13 +25,13 @@ try {
   );
 }
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
+let app: App;
+if (getApps().length === 0) {
+  app = initializeApp({ credential: cert(serviceAccount as Parameters<typeof cert>[0]) });
   logger.info("Firebase Admin initialized");
+} else {
+  app = getApps()[0]!;
 }
 
-export const db = admin.firestore();
-export const auth = admin.auth();
-export default admin;
+export const db = getFirestore(app);
+export const auth = getAuth(app);
