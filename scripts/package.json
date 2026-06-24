@@ -6,6 +6,7 @@
   "scripts": {
     "hello": "tsx ./src/hello.ts",
     "seed": "tsx ./src/seed-firebase.ts",
+    "add-user": "tsx ./src/add-user.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
