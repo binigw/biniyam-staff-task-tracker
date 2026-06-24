@@ -1,0 +1,93 @@
+import { useState } from "react";
+import { useLocation } from "wouter";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { CheckSquare } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+
+const schema = z.object({
+  email: z.string().email("Enter a valid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+type FormValues = z.infer<typeof schema>;
+
+export default function LoginPage() {
+  const { signIn, user } = useAuth();
+  const [, setLocation] = useLocation();
+  const [error, setError] = useState<string | null>(null);
+
+  if (user) {
+    setLocation(user.role === "admin" ? "/dashboard" : "/my-tasks");
+    return null;
+  }
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { email: "", password: "" },
+  });
+
+  const onSubmit = async (values: FormValues) => {
+    setError(null);
+    try {
+      await signIn(values.email, values.password);
+    } catch {
+      setError("Invalid email or password. Please try again.");
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center p-4" data-testid="page-login">
+      <div className="w-full max-w-sm space-y-6">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <div className="flex items-center gap-2">
+            <CheckSquare className="h-7 w-7 text-primary" />
+            <span className="text-xl font-bold tracking-tight">Staff Tracker</span>
+          </div>
+          <p className="text-sm text-muted-foreground">Team task management for small businesses</p>
+        </div>
+
+        <Card className="border shadow-md">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Sign In</CardTitle>
+            <CardDescription>Enter your credentials to access your workspace</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField control={form.control} name="email" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="you@company.com" {...field} data-testid="input-email" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="password" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="••••••••" {...field} data-testid="input-password" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                {error && (
+                  <p className="text-sm text-destructive" data-testid="text-login-error">{error}</p>
+                )}
+                <Button type="submit" className="w-full" disabled={form.formState.isSubmitting} data-testid="button-sign-in">
+                  {form.formState.isSubmitting ? "Signing in..." : "Sign In"}
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
