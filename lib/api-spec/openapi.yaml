@@ -3,13 +3,21 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Staff Task Tracker API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: tasks
+    description: Task operations
+  - name: comments
+    description: Comment operations
+  - name: users
+    description: User operations
+  - name: stats
+    description: Analytics and statistics
 paths:
   /healthz:
     get:
@@ -24,6 +32,195 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /tasks:
+    get:
+      operationId: listTasks
+      tags: [tasks]
+      summary: List tasks
+      description: Admin sees all tasks; Staff sees only assigned tasks
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [To Do, In Progress, Done]
+        - name: priority
+          in: query
+          schema:
+            type: string
+            enum: [High, Medium, Low]
+        - name: assigneeId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+    post:
+      operationId: createTask
+      tags: [tasks]
+      summary: Create a new task (Admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskInput"
+      responses:
+        "201":
+          description: Created task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+  /tasks/{taskId}:
+    get:
+      operationId: getTask
+      tags: [tasks]
+      summary: Get a single task by ID
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Task details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+    patch:
+      operationId: updateTask
+      tags: [tasks]
+      summary: Update a task (Admin can update all; Staff can only update status)
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskUpdate"
+      responses:
+        "200":
+          description: Updated task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+    delete:
+      operationId: deleteTask
+      tags: [tasks]
+      summary: Delete a task (Admin only)
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Task deleted
+
+  /tasks/{taskId}/comments:
+    get:
+      operationId: listComments
+      tags: [comments]
+      summary: List comments for a task
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comment"
+    post:
+      operationId: addComment
+      tags: [comments]
+      summary: Add a comment to a task
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentInput"
+      responses:
+        "201":
+          description: Created comment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List all users in the organization (Admin only)
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+  /stats/overview:
+    get:
+      operationId: getOverviewStats
+      tags: [stats]
+      summary: Admin dashboard — task totals and breakdowns
+      responses:
+        "200":
+          description: Overview statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OverviewStats"
+
+  /stats/my:
+    get:
+      operationId: getMyStats
+      tags: [stats]
+      summary: Current user's personal task stats
+      responses:
+        "200":
+          description: Personal statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MyStats"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +231,207 @@ components:
       required:
         - status
 
+    Task:
+      type: object
+      required:
+        - id
+        - title
+        - assigneeId
+        - assigneeName
+        - priority
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        assigneeId:
+          type: string
+        assigneeName:
+          type: string
+        priority:
+          type: string
+          enum: [High, Medium, Low]
+        status:
+          type: string
+          enum: [To Do, In Progress, Done]
+        dueDate:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    TaskInput:
+      type: object
+      required:
+        - title
+        - assigneeId
+        - assigneeName
+        - priority
+        - status
+      properties:
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        assigneeId:
+          type: string
+        assigneeName:
+          type: string
+        priority:
+          type: string
+          enum: [High, Medium, Low]
+        status:
+          type: string
+          enum: [To Do, In Progress, Done]
+        dueDate:
+          type: string
+
+    TaskUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        assigneeId:
+          type: string
+        assigneeName:
+          type: string
+        priority:
+          type: string
+          enum: [High, Medium, Low]
+        status:
+          type: string
+          enum: [To Do, In Progress, Done]
+        dueDate:
+          type: string
+
+    Comment:
+      type: object
+      required:
+        - id
+        - taskId
+        - authorId
+        - authorName
+        - text
+        - createdAt
+      properties:
+        id:
+          type: string
+        taskId:
+          type: string
+        authorId:
+          type: string
+        authorName:
+          type: string
+        text:
+          type: string
+        createdAt:
+          type: string
+
+    CommentInput:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          minLength: 1
+
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - displayName
+        - role
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        displayName:
+          type: string
+        role:
+          type: string
+          enum: [admin, staff]
+        photoURL:
+          type: ["string", "null"]
+
+    OverviewStats:
+      type: object
+      required:
+        - totalTasks
+        - activeTasks
+        - completedTasks
+        - overdueTasks
+        - byPriority
+        - byAssignee
+      properties:
+        totalTasks:
+          type: integer
+        activeTasks:
+          type: integer
+        completedTasks:
+          type: integer
+        overdueTasks:
+          type: integer
+        byPriority:
+          type: object
+          properties:
+            High:
+              type: integer
+            Medium:
+              type: integer
+            Low:
+              type: integer
+          required: [High, Medium, Low]
+        byAssignee:
+          type: array
+          items:
+            $ref: "#/components/schemas/AssigneeTaskCount"
+
+    AssigneeTaskCount:
+      type: object
+      required:
+        - assigneeId
+        - assigneeName
+        - total
+        - completed
+        - active
+      properties:
+        assigneeId:
+          type: string
+        assigneeName:
+          type: string
+        total:
+          type: integer
+        completed:
+          type: integer
+        active:
+          type: integer
+
+    MyStats:
+      type: object
+      required:
+        - totalAssigned
+        - todo
+        - inProgress
+        - done
+        - overdue
+      properties:
+        totalAssigned:
+          type: integer
+        todo:
+          type: integer
+        inProgress:
+          type: integer
+        done:
+          type: integer
+        overdue:
+          type: integer
