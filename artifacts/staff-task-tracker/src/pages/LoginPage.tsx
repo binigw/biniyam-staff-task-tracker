@@ -10,8 +10,14 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
+// Strip invisible unicode chars (zero-width spaces, LRM, BOM, etc.) that get
+// copied in from messages before validating
+function sanitizeEmail(v: string) {
+  return v.replace(/[\u0000-\u001F\u200B-\u200F\u202A-\u202E\uFEFF]/g, "").trim();
+}
+
 const schema = z.object({
-  email: z.string().email("Enter a valid email"),
+  email: z.string().transform(sanitizeEmail).pipe(z.string().email("Enter a valid email")),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 type FormValues = z.infer<typeof schema>;
