@@ -41,10 +41,24 @@ export default function LoginPage() {
 
   const onSubmit = async (values: FormValues) => {
     setError(null);
+    // Strip invisible unicode chars that get copied in from messages
+    const email = sanitizeEmail(values.email);
+    const password = values.password.replace(/[\u0000-\u001F\u200B-\u200F\u202A-\u202E\uFEFF]/g, "").trim();
     try {
-      await signIn(values.email, values.password);
-    } catch {
-      setError("Invalid email or password. Please try again.");
+      await signIn(email, password);
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code ?? "";
+      if (code === "auth/invalid-credential" || code === "auth/wrong-password" || code === "auth/user-not-found") {
+        setError("Incorrect email or password. Please check and try again.");
+      } else if (code === "auth/too-many-requests") {
+        setError("Too many failed attempts. Please wait a few minutes and try again.");
+      } else if (code === "auth/user-disabled") {
+        setError("This account has been disabled. Contact your administrator.");
+      } else if (code === "auth/invalid-email") {
+        setError("Invalid email format. Please check your email address.");
+      } else {
+        setError(`Sign in failed (${code || "unknown error"}). Please try again.`);
+      }
     }
   };
 
