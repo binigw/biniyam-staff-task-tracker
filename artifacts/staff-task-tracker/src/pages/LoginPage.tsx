@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,10 +22,11 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
-  if (user) {
-    setLocation(user.role === "admin" ? "/dashboard" : "/my-tasks");
-    return null;
-  }
+  useEffect(() => {
+    if (user) {
+      setLocation(user.role === "admin" ? "/dashboard" : "/my-tasks");
+    }
+  }, [user, setLocation]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
