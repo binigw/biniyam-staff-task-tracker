@@ -68,7 +68,7 @@ router.post("/tasks", requireAuth, async (req: AuthRequest, res) => {
 
 router.get("/tasks/:taskId", requireAuth, async (req: AuthRequest, res) => {
   try {
-    const { taskId } = req.params;
+    const { taskId } = req.params as { taskId: string };
     const uid = req.uid!;
     const fbUser = await auth.getUser(uid);
     const role = (fbUser.customClaims?.["role"] as string) ?? "staff";
@@ -78,7 +78,7 @@ router.get("/tasks/:taskId", requireAuth, async (req: AuthRequest, res) => {
       res.status(404).json({ error: "Task not found" });
       return;
     }
-    const task = { id: doc.id, ...doc.data() } as { assigneeId: string; [key: string]: unknown };
+    const task = { id: doc.id, ...doc.data() } as unknown as { assigneeId: string; [key: string]: unknown };
     if (role !== "admin" && task.assigneeId !== uid) {
       res.status(403).json({ error: "Forbidden" });
       return;
@@ -92,7 +92,7 @@ router.get("/tasks/:taskId", requireAuth, async (req: AuthRequest, res) => {
 
 router.patch("/tasks/:taskId", requireAuth, async (req: AuthRequest, res) => {
   try {
-    const { taskId } = req.params;
+    const { taskId } = req.params as { taskId: string };
     const uid = req.uid!;
     const fbUser = await auth.getUser(uid);
     const role = (fbUser.customClaims?.["role"] as string) ?? "staff";
@@ -131,7 +131,7 @@ router.patch("/tasks/:taskId", requireAuth, async (req: AuthRequest, res) => {
 
 router.delete("/tasks/:taskId", requireAuth, async (req: AuthRequest, res) => {
   try {
-    const { taskId } = req.params;
+    const { taskId } = req.params as { taskId: string };
     const uid = req.uid!;
     const fbUser = await auth.getUser(uid);
     const role = (fbUser.customClaims?.["role"] as string) ?? "staff";

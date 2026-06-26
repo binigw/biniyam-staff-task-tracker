@@ -7,7 +7,7 @@ const router = Router();
 
 router.get("/tasks/:taskId/comments", requireAuth, async (req: AuthRequest, res) => {
   try {
-    const { taskId } = req.params;
+    const { taskId } = req.params as { taskId: string };
     const uid = req.uid!;
     const fbUser = await auth.getUser(uid);
     const role = (fbUser.customClaims?.["role"] as string) ?? "staff";
@@ -39,7 +39,7 @@ router.get("/tasks/:taskId/comments", requireAuth, async (req: AuthRequest, res)
 
 router.post("/tasks/:taskId/comments", requireAuth, async (req: AuthRequest, res) => {
   try {
-    const { taskId } = req.params;
+    const { taskId } = req.params as { taskId: string };
     const uid = req.uid!;
     const fbUser = await auth.getUser(uid);
     const role = (fbUser.customClaims?.["role"] as string) ?? "staff";
