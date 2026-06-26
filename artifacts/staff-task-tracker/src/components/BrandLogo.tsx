@@ -50,7 +50,7 @@ export default function BrandLogo({ collapsed = false, size = "md" }: BrandLogoP
               textTransform: "uppercase",
             }}
           >
-            BINIYAM'S
+            BINIYAMS
           </div>
           <div
             style={{
@@ -81,7 +81,7 @@ export default function BrandLogo({ collapsed = false, size = "md" }: BrandLogoP
             textTransform: "uppercase",
           }}
         >
-          BINIYAM'S
+          BINIYAMS
         </div>
         <div
           style={{
