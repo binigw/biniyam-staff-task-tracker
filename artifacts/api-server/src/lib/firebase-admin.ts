@@ -11,11 +11,27 @@ if (!serviceAccountJson) {
   );
 }
 
+function sanitizeJsonString(s: string): string {
+  return (
+    s
+      // Replace Unicode smart/curly double quotes
+      .replace(/[\u201C\u201D\u201E\u201F\u2033\u2036]/g, '"')
+      // Replace Unicode smart/curly single quotes
+      .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'")
+      // Replace all Unicode whitespace variants (non-breaking space, zero-width space,
+      // thin space, en/em space, etc.) with a regular ASCII space
+      .replace(/[\u00A0\u200B\u200C\u200D\u2028\u2029\u202F\u205F\u3000\uFEFF\u00AD]/g, " ")
+      // Strip zero-width invisible characters that don't render
+      .replace(/[\u200E\u200F\u202A-\u202E]/g, "")
+      .trim()
+  );
+}
+
 let serviceAccount: Record<string, unknown>;
 try {
-  let raw = serviceAccountJson.trim();
+  let raw = sanitizeJsonString(serviceAccountJson);
   if (!raw.startsWith("{")) {
-    raw = Buffer.from(raw, "base64").toString("utf-8").trim();
+    raw = sanitizeJsonString(Buffer.from(raw, "base64").toString("utf-8"));
   }
   serviceAccount = JSON.parse(raw) as Record<string, unknown>;
 } catch (err) {
