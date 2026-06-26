@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import {
-  LayoutDashboard, ListChecks, KanbanSquare, Users, Settings, LogOut, CheckSquare, Sun, Moon, ChevronLeft, Menu
+  LayoutDashboard, ListChecks, KanbanSquare, Users, Settings, LogOut, Sun, Moon, ChevronLeft, Menu
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
@@ -8,6 +8,7 @@ import { useTheme } from "@/lib/theme-context";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import BrandLogo from "@/components/BrandLogo";
 
 const adminNav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -41,10 +42,7 @@ export default function Sidebar() {
       {/* Header */}
       <div className={cn("flex items-center h-14 px-3 border-b border-sidebar-border", collapsed ? "justify-center" : "justify-between")}>
         {!collapsed && (
-          <div className="flex items-center gap-2">
-            <CheckSquare className="h-5 w-5 text-sidebar-primary" />
-            <span className="font-semibold text-sm tracking-tight">Staff Tracker</span>
-          </div>
+          <BrandLogo size="sm" />
         )}
         <Button
           variant="ghost"

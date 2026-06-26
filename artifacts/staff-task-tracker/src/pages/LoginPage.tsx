@@ -3,8 +3,9 @@ import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { CheckSquare, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import BrandLogo from "@/components/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -65,11 +66,8 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4" data-testid="page-login">
       <div className="w-full max-w-sm space-y-6">
-        <div className="flex flex-col items-center gap-2 text-center">
-          <div className="flex items-center gap-2">
-            <CheckSquare className="h-7 w-7 text-primary" />
-            <span className="text-xl font-bold tracking-tight">Staff Tracker</span>
-          </div>
+        <div className="flex flex-col items-center gap-3 text-center">
+          <BrandLogo size="lg" />
           <p className="text-sm text-muted-foreground">Team task management for small businesses</p>
         </div>
 
