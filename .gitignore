@@ -2,6 +2,8 @@
 
 # compiled output
 dist
+# lib declarations must be committed so CI/Vercel can resolve workspace packages
+!lib/*/dist
 tmp
 out-tsc
 *.tsbuildinfo
