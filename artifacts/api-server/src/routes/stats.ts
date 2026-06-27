@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { db, auth } from "../lib/firebase-admin";
 import { requireAuth, type AuthRequest } from "./auth-middleware";
+import { logger } from "../lib/logger";
 
 const router = Router();
 
@@ -45,7 +46,7 @@ router.get("/stats/overview", requireAuth, async (req: AuthRequest, res) => {
 
     res.json({ totalTasks, activeTasks, completedTasks, overdueTasks, byPriority, byAssignee });
   } catch (err) {
-    req.log.error({ err }, "getOverviewStats error");
+    logger.error({ err }, "getOverviewStats error");
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -67,7 +68,7 @@ router.get("/stats/my", requireAuth, async (req: AuthRequest, res) => {
 
     res.json({ totalAssigned: snap.size, todo, inProgress, done, overdue });
   } catch (err) {
-    req.log.error({ err }, "getMyStats error");
+    logger.error({ err }, "getMyStats error");
     res.status(500).json({ error: "Internal server error" });
   }
 });

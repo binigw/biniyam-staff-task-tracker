@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { auth } from "../lib/firebase-admin";
 import { requireAuth, type AuthRequest } from "./auth-middleware";
+import { logger } from "../lib/logger";
 
 const router = Router();
 
@@ -34,7 +35,7 @@ router.get("/users", requireAuth, async (req: AuthRequest, res) => {
     }));
     res.json(users);
   } catch (err) {
-    req.log.error({ err }, "listUsers error");
+    logger.error({ err }, "listUsers error");
     res.status(500).json({ error: "Internal server error" });
   }
 });

@@ -35,7 +35,7 @@ router.get("/tasks", requireAuth, async (req: AuthRequest, res) => {
     const tasks = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     res.json(tasks);
   } catch (err) {
-    req.log.error({ err }, "listTasks error");
+    logger.error({ err }, "listTasks error");
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -61,7 +61,7 @@ router.post("/tasks", requireAuth, async (req: AuthRequest, res) => {
     const ref = await db.collection(TASKS).add(data);
     res.status(201).json({ id: ref.id, ...data });
   } catch (err) {
-    req.log.error({ err }, "createTask error");
+    logger.error({ err }, "createTask error");
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -85,7 +85,7 @@ router.get("/tasks/:taskId", requireAuth, async (req: AuthRequest, res) => {
     }
     res.json(task);
   } catch (err) {
-    req.log.error({ err }, "getTask error");
+    logger.error({ err }, "getTask error");
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -124,7 +124,7 @@ router.patch("/tasks/:taskId", requireAuth, async (req: AuthRequest, res) => {
     const updated = await db.collection(TASKS).doc(taskId).get();
     res.json({ id: updated.id, ...updated.data() });
   } catch (err) {
-    req.log.error({ err }, "updateTask error");
+    logger.error({ err }, "updateTask error");
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -142,7 +142,7 @@ router.delete("/tasks/:taskId", requireAuth, async (req: AuthRequest, res) => {
     await db.collection(TASKS).doc(taskId).delete();
     res.status(204).send();
   } catch (err) {
-    req.log.error({ err }, "deleteTask error");
+    logger.error({ err }, "deleteTask error");
     res.status(500).json({ error: "Internal server error" });
   }
 });

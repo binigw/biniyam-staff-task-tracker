@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, auth } from "../lib/firebase-admin";
 import { requireAuth, type AuthRequest } from "./auth-middleware";
 import { AddCommentBody } from "@workspace/api-zod";
+import { logger } from "../lib/logger";
 
 const router = Router();
 
@@ -32,7 +33,7 @@ router.get("/tasks/:taskId/comments", requireAuth, async (req: AuthRequest, res)
     const comments = snap.docs.map((d) => ({ id: d.id, taskId, ...d.data() }));
     res.json(comments);
   } catch (err) {
-    req.log.error({ err }, "listComments error");
+    logger.error({ err }, "listComments error");
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -72,7 +73,7 @@ router.post("/tasks/:taskId/comments", requireAuth, async (req: AuthRequest, res
     const ref = await db.collection("tasks").doc(taskId).collection("comments").add(data);
     res.status(201).json({ id: ref.id, ...data });
   } catch (err) {
-    req.log.error({ err }, "addComment error");
+    logger.error({ err }, "addComment error");
     res.status(500).json({ error: "Internal server error" });
   }
 });
