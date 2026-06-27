@@ -1,4 +1,6 @@
 {
+  "framework": null,
   "buildCommand": "pnpm -w run typecheck:libs && pnpm --filter @workspace/api-server run build",
-  "installCommand": "pnpm install --frozen-lockfile"
+  "installCommand": "pnpm install --frozen-lockfile",
+  "outputDirectory": "artifacts/api-server/dist"
 }
